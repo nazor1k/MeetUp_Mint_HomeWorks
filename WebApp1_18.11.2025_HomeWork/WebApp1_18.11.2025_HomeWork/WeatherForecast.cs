@@ -1,4 +1,4 @@
-namespace WebApp1_18._11._2025
+namespace WebApp1_18._11._2025_HomeWork
 {
     public class WeatherForecast
     {

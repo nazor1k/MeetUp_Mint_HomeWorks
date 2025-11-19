@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>WebApp1_18._11._2025</RootNamespace>
+    <RootNamespace>WebApp1_18._11._2025_HomeWork</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
