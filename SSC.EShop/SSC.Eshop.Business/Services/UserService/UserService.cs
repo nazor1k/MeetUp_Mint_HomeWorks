@@ -1,4 +1,5 @@
 ﻿
+using SSC.Eshop.Business.DTOs;
 using SSC.EShop.Core.Entities;
 using SSC.EShop.Core.Interfaces;
 using System;
@@ -25,94 +26,61 @@ namespace SSC.Eshop.Business.Services.UserService
         }
 
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> RegisterAsync(CreateUserDto createUserDto)
         {
-            try
+            var existingUsers = await _userRepository.GetByConditionAsync(u => u.Login == createUserDto.Login);
+            if (existingUsers.Any())
             {
-                var user = await _userRepository.GetByIdAsync(id);
-                if (user == null)
-                {
-                    _eshopLogger.LogWarning($"User with id {id} not found.");
-                    return false;
-                }
-
-                await _userRepository.DeleteAsync(id);
-                await _unitOfWork.SaveChangesAsync();
-
-                _eshopLogger.LogInfo($"User with id {id} deleted successfully.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _eshopLogger.LogError($"Error in DeleteUserAsync", ex);
+                _eshopLogger.LogWarning($"Register failed. User with login {createUserDto.Login} already exists.");
                 return false;
             }
+
+            var newUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Login = createUserDto.Login,
+                FirstName = createUserDto.FirstName,
+                Password = createUserDto.Password
+            };
+
+            await _userRepository.InsertAsync(newUser);
+            await _unitOfWork.SaveChangesAsync();
+
+            _eshopLogger.LogInfo($"User {newUser.Id} registered successfully.");
+            return true;
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<UserDto>> GetAllAsync()
         {
-            try
-            {
-                var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
 
-                if (users == null || users.Count == 0)
-                {
-                    _eshopLogger.LogWarning("No users found.");
-                    return new List<User>();
-                }
-
-                _eshopLogger.LogInfo("Users retrieved successfully.");
-                return users;
-            }
-            catch (Exception ex)
+            return users.Select(user => new UserDto
             {
-                _eshopLogger.LogError("Error in GetAllUsersAsync", ex);
-                return new List<User>();
-            }
+                Id = user.Id,
+                Login = user.Login,
+                FirstName = user.FirstName ?? string.Empty
+            }).ToList();
         }
 
-        public async Task<List<User>> GetByConditionAsync(Expression<Func<User, bool>> condition)
+       
+
+        public async Task<UserDto?> GetByIdAsync(Guid id)
         {
-            try
-            {
-                var users = await _userRepository.GetByConditionAsync(condition);
-                if (users == null || users.Count == 0)
-                {
-                    _eshopLogger.LogWarning("No users found matching the condition.");
-                    return new List<User>();
-                }
+            var user = await _userRepository.GetByIdAsync(id);
 
-                return users;
-            }
-            catch (Exception ex)
+            if (user == null)
             {
-                _eshopLogger.LogError("Error in GetByConditionAsync", ex);
-                return new List<User>();
-            }
-        }
-
-        public async Task<User?> GetByIdAsync(Guid id)
-        {
-            try
-            {
-                _eshopLogger.LogInfo($"Retrieving user with id {id}.");
-                var user = await _userRepository.GetByIdAsync(id);
-
-                if (user == null)
-                {
-                    _eshopLogger.LogWarning($"User with id {id} not found.");
-                    return null;
-                }
-
-                return user;
-            }
-            catch (Exception ex)
-            {
-                _eshopLogger.LogError("Error in GetByIdAsync", ex);
+                _eshopLogger.LogWarning($"User with id {id} not found.");
                 return null;
             }
-        }
 
+            return new UserDto
+            {
+                Id = user.Id,
+                Login = user.Login,
+                FirstName = user.FirstName ?? string.Empty
+            };
+        }
         public async Task<bool> InsertAsync(User user)
         {
             try
@@ -129,28 +97,39 @@ namespace SSC.Eshop.Business.Services.UserService
             }
         }
 
-        public async Task<bool> UpdateAsync(User user)
+        public async Task<bool> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
         {
-            try
-            {
-                var existingUser = await _userRepository.GetByIdAsync(user.Id);
-                if (existingUser == null)
-                {
-                    _eshopLogger.LogWarning($"User with id {user.Id} not found.");
-                    return false;
-                }
+            var user = await _userRepository.GetByIdAsync(id);
 
-                await _userRepository.UpdateAsync(user);
-                await _unitOfWork.SaveChangesAsync();
-
-                _eshopLogger.LogInfo("User updated successfully.");
-                return true;
-            }
-            catch (Exception ex)
+            if (user == null)
             {
-                _eshopLogger.LogError("Error in UpdateUserAsync", ex);
+                _eshopLogger.LogWarning($"Update failed. User with id {id} not found.");
                 return false;
             }
+
+            user.FirstName = updateUserDto.FirstName;
+            user.Login = updateUserDto.Login;
+
+            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            _eshopLogger.LogInfo($"User {id} updated successfully.");
+            return true;
+        }
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                _eshopLogger.LogWarning($"Delete failed. User with id {id} not found.");
+                return false;
+            }
+
+            await _userRepository.DeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
+
+            _eshopLogger.LogInfo($"User {id} deleted successfully.");
+            return true;
         }
     }
 }

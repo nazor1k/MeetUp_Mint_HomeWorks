@@ -1,5 +1,7 @@
-﻿using SSC.EShop.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using SSC.EShop.Core.Entities;
 using SSC.EShop.Core.Interfaces;
+using SSC.EShop.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,37 +13,51 @@ namespace SSC.EShop.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IUserRepository _userRepository;
+        private readonly EshopDbContext _context;
         private readonly IAppLogger<UserRepository> _logger;
-        
-        public Task DeleteAsync(Guid id)
+
+        public UserRepository(EshopDbContext context, IAppLogger<UserRepository> logger)
         {
-            throw new NotImplementedException();
+            _context = context;
+            _logger = logger;
+        }
+        public async Task DeleteAsync(Guid id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+            }
         }
 
-        public Task<List<User>> GetAllAsync()
+        public async Task<List<User>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Users.AsNoTracking().ToListAsync();
         }
 
-        public Task<List<User>> GetByConditionAsync(Expression<Func<User, bool>> condition)
+        public async Task<List<User>> GetByConditionAsync(Expression<Func<User, bool>> condition)
         {
-            throw new NotImplementedException();
+            return await _context.Users.Where(condition).AsNoTracking().ToListAsync();
         }
 
-        public Task<User?> GetByIdAsync(Guid id)
+        public async Task<User?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.Users.FindAsync(id);
         }
 
-        public Task InsertAsync(User user)
+        public async Task InsertAsync(User user)
         {
-            throw new NotImplementedException();
+            await _context.Users.AddAsync(user);
         }
 
-        public Task UpdateAsync(User user)
+
+        public async Task UpdateAsync(User user)
         {
-            throw new NotImplementedException();
+
+            _context.Users.Update(user);
+
+
         }
+
     }
 }

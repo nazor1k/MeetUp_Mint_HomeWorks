@@ -1,6 +1,35 @@
+@WebApp1_18.11.2025_HomeWork_HostAddress = https://localhost:7249
 @WebApp1_18._11._2025_HomeWork_HostAddress = http://localhost:5046
 
 GET {{WebApp1_18._11._2025_HomeWork_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+GET {{WebApp1_18.11.2025_HomeWork_HostAddress}}/api/todoitems
+
+###
+
+POST {{WebApp1_18.11.2025_HomeWork_HostAddress}}/api/todoitems
+Content-Type: application/json
+
+{
+  "name": "walk dog",
+  "isComplete": true
+}
+
+###
+
+@id=0
+DELETE {{WebApp1_18.11.2025_HomeWork_HostAddress}}/api/todoitems/{{id}}
+
+###
+
+PUT {{WebApp1_18.11.2025_HomeWork_HostAddress}}/api/todoitems/{{id}}
+Content-Type: application/json
+
+{
+  //TodoItem
+}
 
 ###

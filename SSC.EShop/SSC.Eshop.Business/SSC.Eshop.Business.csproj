@@ -10,8 +10,4 @@
     <ProjectReference Include="..\SSC.EShop.Core\SSC.EShop.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\" />
-  </ItemGroup>
-
 </Project>
